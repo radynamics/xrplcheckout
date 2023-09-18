@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payment Request</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="assets/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/xrpl/build/xrpl-latest-min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar bg-light">
+        <div class="container-fluid">
+            <a href="/" class="navbar-brand d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+                <img class="bi me-2 d-none" width="32" height="32" alt="Provider image" id="providerImage" />
+                <span class="fs-4" id="providerName">&nbsp;</span>
+            </a>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span id="networkDisplayText">loading</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" id="mainnet">Mainnet</a></li>
+                    <li><a class="dropdown-item" href="#" id="testnet">Testnet</a></li>            
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container pt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-12">
+                <div class="card text-center">
+                    <div class="card-header bg-dark d-flex justify-content-between fw-bold">
+                        <div class="text-light m-2">Payment request</div>
+                        <div class="text-light m-2" id="divLabelAmount">
+                            <span id="amount">0.00</span>
+                            <span id="ccy"></span>
+                        </div>
+                        <div class="d-flex text-light w-50 d-none" id="divInputAmount">
+                            <input class="form-control" type="number" id="txtAmount" placeholder="9.99">
+                            <input class="form-control w-25" type="text" id="txtCcy" placeholder="EUR">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" class="text-end w-25">to:</th>
+                                        <td class="text-start">
+                                            <span id="to">unknown</span>
+                                            <input class="form-control d-none" type="text" id="txtTo" placeholder="rLJY2...">
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none" id="refnoRow">
+                                        <th scope="row" class="text-end w-25">reference:</th>
+                                        <td class="text-start">
+                                            <span id="refno">none</span>
+                                            <input class="form-control d-none" type="text" id="txtRefNo" placeholder="RF18539007547034">
+                                        </td>
+                                    </tr>
+                                    <tr class="d-none" id="msgRow">
+                                        <th scope="row" class="text-end w-25">message:</th>
+                                        <td class="text-start">
+                                            <span id="msg">none</span>
+                                            <input class="form-control d-none" type="text" id="txtMsg" placeholder="Order 123-456">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </p>
+                        <div id="processor">
+                            <div class="pt-3" id="redirectBox">
+                                <p class="card-text" id="payAdviseText">&nbsp;</p>
+                                <button type="button" class="btn btn-primary btn-lg col-10" id="redirectRequest" disabled>
+                                    <div class="fw-bold" id="payWith">Please wait...</div>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#changeProcessorModal" id="changeProcessor">
+                                    or choose another payment method
+                                </button>
+                                <div class="modal fade" id="changeProcessorModal" tabindex="-1" aria-labelledby="changeProcessorLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="changeProcessorLabel">Choose your payment method</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="container">
+                                                    <div class="row">
+                                                        <div class="col" data-bs-dismiss="modal" id="processor_xumm">
+                                                            <div class="card p-2 m-1 cursor-pointer" style="width: 10rem;">
+                                                                <img class="card-img-top" src="assets/processors/xumm.png" alt="Xumm" />
+                                                                <div class="card-img-overlay card-inverse text-bg-dark d-flex align-items-center disabled-overlay d-none" id="processor_xumm_overlay">
+                                                                    <h6 class="text-stroke text-white pb-5" id="processor_xumm_overlay_text"></h6>
+                                                                </div>
+                                                                <a href="https://xumm.app" class="card-link pt-2 small" target="_blank">Xumm</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col" data-bs-dismiss="modal" id="processor_dallipay">
+                                                            <div class="card p-2 m-1 cursor-pointer" style="width: 10rem;">
+                                                                <img class="card-img-top" src="assets/processors/dallipay.png" alt="DalliPay" />
+                                                                <div class="card-img-overlay card-inverse text-bg-dark d-flex align-items-center disabled-overlay d-none" id="processor_dallipay_overlay">
+                                                                    <h6 class="text-stroke text-white pb-5" id="processor_dallipay_overlay_text"></h6>
+                                                                </div>
+                                                                <a href="https://www.dallipay.com" class="card-link pt-2 small" target="_blank">DalliPay</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col" data-bs-dismiss="modal" id="processor_crossmark">
+                                                            <div class="card p-2 m-1 cursor-pointer" style="width: 10rem;">
+                                                                <img class="card-img-top" src="assets/processors/crossmark.png" alt="Crossmark" />
+                                                                <div class="card-img-overlay card-inverse text-bg-dark d-flex align-items-center disabled-overlay d-none" id="processor_crossmark_overlay">
+                                                                    <h6 class="text-stroke text-white pb-5" id="processor_crossmark_overlay_text"></h6>
+                                                                </div>
+                                                                <a href="https://crossmark.io" class="card-link pt-2 small" target="_blank">Crossmark</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                                  
+                            </div>
+                            <div class="pt-3" id="infoBox">
+                                <div class="pt-2 small text-secondary">
+                                    <a href="https://www.xrpl.org" class="link-secondary" target="_blank">What is XRPL?</a>
+                                    &nbsp;|&nbsp;
+                                    <a href="https://www.dallipay.com/getstarted" class="link-secondary" target="_blank">Getting started with XRPL payments.</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-3 d-none" id="successBox">
+                            <div class="alert alert-success" role="alert" id="success"></div>
+                        </div>        
+                        <div class="pt-3 d-none" id="errorBox">
+                            <div class="alert alert-danger" role="alert" id="error"></div>
+                        </div>
+                        <div class="pt-3 d-none" id="togglePreview">
+                            <button type="button" class="btn btn-outline-primary col-5" id="preview">Show preview</button>
+                            <div class="pt-5">
+                                <label for="txtPaymentRequestLink" class="form-label">
+                                    <span>Payment request link</span>
+                                    <span class="small">(<a href="#" id="openLink" target="_blank">open</a>)</span>
+                                </label>
+                                <textarea class="form-control" id="txtPaymentRequestLink" rows="3"></textarea>
+                                <div class="small">Services like <a href="https://tinyurl.com" target="_blank">tinyurl.com</a> shorten the URL for your customers convenience.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4">
+            <div class="col-md-4 d-flex align-items-center small">
+                <span class="mb-3 mb-md-0 text-muted small">v0.9.6-beta | <a href="https://www.radynamics.com" class="text-muted text-decoration-none" target="_blank">radynamics</a></span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script type="module" defer>
+        import { DalliPay } from "./processors/dallipay.js"
+        import { XummProcessor } from "./processors/xumm.js"
+        import { Crossmark } from "./processors/crossmark.js"
+        var settings = null
+        var selectedNetworkId = null
+        var allProcessors = []
+        var processor = null
+
+        async function onLoad() {
+            await init()
+
+            const queryParams = new URLSearchParams(window.location.search)
+            let isEditable = queryParams.get('edit') === '1' || getOrNull('to') == null
+            updateInputState(isEditable)
+            
+            let amount = amountFormatted()
+            document.getElementById('amount').innerText = amount
+            document.getElementById('txtAmount').value = validAmountOrNull() === null ? '' : amount
+            var ccy = getOrNull('currency')
+            ccy = ccy === null ? 'XRP' : ccy
+            document.getElementById('ccy').innerText = ccy
+            document.getElementById('txtCcy').value = ccy
+
+            let to = getOrNull('to')
+            set('to', to)
+            document.getElementById('txtTo').value = to
+
+            let refno = getOrNull('refno')
+            set('refno', refno)
+            if(!empty(refno)) {
+                show('refnoRow')
+                document.getElementById('txtRefNo').value = refno
+            }
+
+            let msg = getOrNull('msg')
+            set('msg', msg)
+            if(!empty(msg)) {
+                show('msgRow')
+                document.getElementById('txtMsg').value = msg
+            }
+
+            initPayWith(ccy)
+
+            if(isEditable) {
+                updateLink()
+                show('togglePreview')
+            }
+        }
+        function empty(msg) {
+            return msg === null || msg.length === 0
+        }
+        function isVisible(id) {
+            return !document.getElementById(id).classList.contains('d-none')
+        }
+        function amountFormatted() {
+            let amount = validAmountOrNull()
+            if(amount === null) {
+                return '0.00'
+            }
+            const decimalIndex = amount.toString().indexOf('.')
+            let fractionDigits = decimalIndex >= 0 ? amount.toString().length - decimalIndex - 1 : 0
+            return fractionDigits > 2 ? amount : amount.toLocaleString(undefined, { minimumFractionDigits: 2 })
+        }
+        function validAmountOrNull() {
+            const queryParams = new URLSearchParams(window.location.search)
+            let amountText = queryParams.get('amount')
+            if(amountText === null) {
+                return null
+            }
+            return new Number(amountText)
+        }
+        function getOrNull(key) {
+            const queryParams = new URLSearchParams(window.location.search)
+            return queryParams.has(key) ? queryParams.get(key) : null
+        }
+        function set(id, value) {
+            if(value === null) {
+                document.getElementById(id).innerText = 'none'
+                document.getElementById(id).classList.add('fst-italic')
+            } else {
+                document.getElementById(id).innerText = value
+            }
+        }
+        function getCcy() {
+            return get('txtCcy').toUpperCase()
+        }
+        function get(id) {
+            return document.getElementById(id).value
+        }
+
+        function redirectRequestClick() {
+            redirectRequest()
+        }
+        async function redirectRequest() {
+            const xrplClient = await createAndConnectXrplClient()
+            try {
+                document.getElementById('redirectRequest').disabled = true
+                document.getElementById('changeProcessor').disabled = true
+                hideError()
+                hideSuccess()
+
+                const resp = await processor.pay(xrplClient, createProcessorParams())
+                hide('redirectBox')
+                showSuccess(`Successfully sent payment request to your opened ${processor.name()}. This page can be closed at any time.`)
+                document.getElementById('redirectRequest').disabled = false
+                document.getElementById('changeProcessor').disabled = false
+            } catch (err) {
+                showError(err.message)
+                document.getElementById('redirectRequest').disabled = false
+                document.getElementById('changeProcessor').disabled = false
+            } finally {
+                xrplClient.disconnect()
+            }
+        }
+        function createProcessorParams() {
+            let isEditable = isVisible('togglePreview')
+            let url = isEditable ? get('txtPaymentRequestLink') : window.location.search
+            return toProcessorPayParams(new URLSearchParams(url))
+        }
+        function toProcessorPayParams(params) {
+            var result = {}
+            if(params.get('to') !== null) result['to'] = trim(params.get('to'))
+            if(params.get('amount') !== null) result['amount'] = params.get('amount')
+            if(params.get('currency') !== null) result['currency'] = trim(params.get('currency'))
+            if(params.get('dt') !== null) result['destinationTag'] = trim(params.get('dt'))
+            if(params.get('refno') !== null) result['referenceNo'] = trim(params.get('refno'))
+            if(params.get('msg') !== null) result['message'] = trim(params.get('msg'))
+            return result
+        }
+        function trim(value) {
+            return value === undefined ? value : value.trim()
+        }
+
+        function processorChanged(containerId, id) {
+            if(document.getElementById(containerId).disabled) {
+                return
+            }
+
+            let p = getProcessor(id)
+            window.localStorage.setItem('lastUsedProcessorId', p.id())
+            setProcessor(p)
+        }
+        function setProcessor(p) {
+            processor = p
+            document.getElementById('payWith').innerText = `Pay with ${processor.name()}`
+            document.getElementById('redirectRequest').disabled = false
+            document.getElementById('payAdviseText').innerText = processor.getPayAdviseText() === null ? '' : processor.getPayAdviseText()
+        }
+        function getProcessor(id) {
+            for(var i = 0; i < allProcessors.length; i++) {
+                if (allProcessors[i].id() === id) {
+                    return allProcessors[i]
+                }
+            }
+            throw new Error(`Processor ${id} unknown`)
+        }
+
+        async function createAndConnectXrplClient() {
+            var url = null
+            switch(selectedNetworkId) {
+                case 'mainnet': url = 'wss://xrplcluster.com'; break
+                case 'testnet': url = 'wss://s.altnet.rippletest.net:51233'; break
+                default: throw new Error(`${selectedNetworkId} unknown`)
+            }
+            let xrplClient = new xrpl.Client(url)
+            await xrplClient.connect()
+            return xrplClient
+        }
+        function networkChanged(id) {
+            var displayText = 'unknown'
+            switch(id) {
+                case 'mainnet': displayText = 'Mainnet'; break
+                case 'testnet': displayText = 'Testnet'; break
+                default: throw new Error(`${id} unknown`)
+            }
+            document.getElementById('networkDisplayText').innerText = displayText
+            selectedNetworkId = id
+            // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
+            initPayWith(getCcy())
+        }
+
+        function hideError() {
+            hide('errorBox')
+        }
+        function showError(msg) {
+            console.error(msg)
+            document.getElementById('error').innerText = msg
+            show('errorBox')
+        }
+        function hideSuccess() {
+            hide('successBox')
+        }
+        function showSuccess(msg) {
+            document.getElementById('success').innerText = msg
+            show('successBox')
+        }
+        function show(id) {
+            document.getElementById(id).classList.remove('d-none')
+        }
+        function hide(id) {
+            document.getElementById(id).classList.add('d-none')
+        }
+
+        async function init() {
+            let settingsFile = 'settings.json'
+            await fetch(settingsFile).then (function (response) {
+                return response.json();
+            }).then (function (data) {
+                settings = data
+            }).catch (function (error) {
+                console.log (`Loading ${settingsFile} failed (${error}). Using default values.`)
+                settings = {
+                    provider: {
+                        imagePath: 'assets/productIcon.png',
+                        name: 'XRPL Checkout'
+                    },
+                    xumm: {
+                        apiKey: null
+                    }
+                }
+            }).finally(function() {
+                settingsLoaded()
+            })
+
+            allProcessors.push(new XummProcessor(settings))
+            allProcessors.push(new DalliPay())
+            allProcessors.push(new Crossmark())
+            networkChanged('mainnet')
+        }
+        function settingsLoaded() {
+            document.title = `${settings.provider.name} Payment Request`
+            document.getElementById('providerName').innerText = settings.provider.name
+            if(settings.provider.imagePath !== undefined) {
+                document.getElementById('providerImage').src = settings.provider.imagePath
+                show('providerImage')
+            }
+        }
+
+        async function initPayWith(ccy) {
+            var usable = []
+            const xrplClient = await createAndConnectXrplClient()
+            let params = createProcessorParams()
+            for (var i = 0; i < allProcessors.length; i++) {
+                var p = allProcessors[i]
+
+                let readyResult = p.isReady()
+                if (!readyResult.ready) {
+                    disableProcessor(p, readyResult.reason.text)
+                    continue
+                }
+                
+                if (ccy === 'XRP') {
+                    enableProcessor(p)
+                    usable.push(p)
+                    continue
+                }
+
+                try {
+                    let iouResult = await p.supportsIOU(xrplClient, params)
+                    if (iouResult.supported) {
+                        enableProcessor(p)
+                        usable.push(p);
+                    } else {
+                        disableProcessor(p, iouResult.reason.text)
+                    }
+                } catch (err) {
+                    disableProcessor(p, `Error: ${err.message}`)
+                }
+            }
+            xrplClient.disconnect()
+
+            if (usable.length === 0) {
+                return
+            }
+
+            let lastUsedProcessorId = window.localStorage.getItem('lastUsedProcessorId')
+            var use = usable[0]
+            for (var i = 0; i < usable.length; i++) {
+                if (usable[i].id() === lastUsedProcessorId) {
+                    use = usable[i]
+                    break
+                }
+            }
+            setProcessor(use)
+        }
+        function enableProcessor(p) {
+            document.getElementById(`processor_${p.id()}`).disabled = false
+            hide(`processor_${p.id()}_overlay`)
+        }
+        function disableProcessor(p, reason) {
+            document.getElementById(`processor_${p.id()}`).disabled = true
+            show(`processor_${p.id()}_overlay`)
+            document.getElementById(`processor_${p.id()}_overlay`).innerText = reason
+        }
+
+        function previewClick() {
+            document.getElementById('amount').innerText = get('txtAmount')
+            document.getElementById('ccy').innerText = getCcy()
+            set('to', get('txtTo'))
+            let refno = get('txtRefNo')
+            set('refno', refno)
+            let msg = get('txtMsg')
+            set('msg', msg)
+
+            let isEditable = isVisible('divInputAmount')
+            updateInputState(!isEditable)
+
+            if(empty(refno) && isEditable) {
+                hide('refnoRow')
+            } else {
+                show('refnoRow')
+            }
+            if(empty(msg) && isEditable) {
+                hide('msgRow')
+            } else {
+                show('msgRow')
+            }
+
+            if(!isEditable) {
+                hide('successBox')
+                hide('errorBox')
+            }
+
+            document.getElementById('preview').innerText = isEditable ? 'Edit' : 'Show preview'
+            updateLink()
+        }
+        function updateInputState(isEditable) {
+            if(isEditable) {
+                hide('divLabelAmount')
+                show('divInputAmount')
+                hide('to')
+                show('txtTo')
+                hide('refno')
+                show('txtRefNo')
+                show('refnoRow')
+                hide('msg')
+                show('txtMsg')
+                show('msgRow')
+                hide('redirectBox')
+                hide('infoBox')
+            } else {
+                show('divLabelAmount')
+                hide('divInputAmount')
+                show('to')
+                hide('txtTo')
+                show('refno')
+                hide('txtRefNo')
+                hide('refnoRow')
+                show('msg')
+                hide('txtMsg')
+                hide('msgRow')
+                show('redirectBox')
+                show('infoBox')
+            }
+        }
+        function updateLink() {
+            let path = window.location.href.split('?')[0]
+            // Hack needed to ensure new URLSearchParams(...) gets 'to' as param
+            path += '?1=1'
+            path += '&to=' + trim(get('txtTo'))
+            path += '&amount=' + get('txtAmount')
+            let ccy = trim(getCcy())
+            if(!empty(ccy)) path += '&currency=' + ccy
+            let refno = trim(get('txtRefNo'))
+            if(!empty(refno)) path += '&refno=' + refno
+            let msg = trim(get('txtMsg'))
+            if(!empty(msg)) path += '&msg=' + msg
+            
+            document.getElementById('txtPaymentRequestLink').value = path
+            document.getElementById('openLink').href = path
+        }
+
+        function formatAmount() {
+            if (getCcy() === 'XRP') {
+                return
+            }
+            const txtAmount = document.getElementById('txtAmount')
+            txtAmount.value = parseFloat(txtAmount.value).toFixed(2);
+        }
+
+        window.addEventListener('load', onLoad);
+        document.getElementById('redirectRequest').addEventListener('click', redirectRequestClick);
+        document.getElementById('processor_xumm').addEventListener('click', function(e) { processorChanged('processor_xumm', XummProcessor.id) });
+        document.getElementById('processor_dallipay').addEventListener('click', function() { processorChanged('processor_dallipay', DalliPay.id)});
+        document.getElementById('processor_crossmark').addEventListener('click', function(e) { processorChanged('processor_crossmark', Crossmark.id) });
+        document.getElementById('preview').addEventListener('click', previewClick);
+        document.getElementById('mainnet').addEventListener('click', function() { networkChanged('mainnet') });
+        document.getElementById('testnet').addEventListener('click', function() { networkChanged('testnet') });
+
+        document.getElementById('txtAmount').addEventListener('change', formatAmount);
+        document.getElementById('txtCcy').addEventListener('change', formatAmount);
+        document.getElementById('txtAmount').addEventListener('change', updateLink);
+        document.getElementById('txtCcy').addEventListener('change', updateLink);
+        document.getElementById('txtTo').addEventListener('change', updateLink);
+        document.getElementById('txtRefNo').addEventListener('change', updateLink);
+        document.getElementById('txtMsg').addEventListener('change', updateLink);
+    </script>
+</body>
+
+</html>

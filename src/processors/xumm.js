@@ -22,6 +22,7 @@ export class XummProcessor {
     }
 
     async supportsIOU(xrplClient, params) {
+        if(params.currency === 'XRP') return { supported: true }
         return await XrplUtils.hasTrustline(xrplClient, params.to, params.currency)
             ? { supported: true }
             : { supported: false, reason: { text: `Receiver doesn't have a TrustLine for ${params.currency}`} }

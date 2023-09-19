@@ -210,11 +210,13 @@
                 document.getElementById('txtMsg').value = msg
             }
 
-            initPayWith(ccy)
+            await initPayWith(ccy)
 
             if(isEditable) {
                 updateLink()
                 show('togglePreview')
+            } else {
+                showErrorsIfPresent(validateRequest(to, validAmountOrNull(), ccy))
             }
         }
         function empty(msg) {
@@ -257,6 +259,36 @@
         }
         function get(id) {
             return document.getElementById(id).value
+        }
+
+        function showErrorsIfPresent(errors) {
+            var hasErrors = errors.length !== 0
+            document.getElementById('redirectRequest').disabled = hasErrors
+            document.getElementById('changeProcessor').disabled = hasErrors
+            if(!hasErrors) {
+                return
+            }
+
+            var errorMessages = ''
+            for(var i = 0; i < errors.length; i++) {
+                errorMessages += `${errors[i]}\n`;
+            }
+            showError(errorMessages)
+        }
+        function validateRequest(to, amount, ccy) {
+            var list = []
+
+            if(to === undefined || to === '') {
+                list.push(i18next.t('receiverMissing'))
+            }
+            if(amount === undefined || amount === null || amount === '' || amount === 0) {
+                list.push(i18next.t('amountMissing'))
+            }
+            if(ccy === undefined || ccy === '') {
+                list.push(i18next.t('ccyMissing'))
+            }
+
+            return list
         }
 
         function redirectRequestClick() {
@@ -465,9 +497,12 @@
         }
 
         function previewClick() {
-            document.getElementById('amount').innerText = get('txtAmount')
-            document.getElementById('ccy').innerText = getCcy()
-            set('to', get('txtTo'))
+            let amount = get('txtAmount')
+            document.getElementById('amount').innerText = amount
+            let ccy = getCcy()
+            document.getElementById('ccy').innerText = ccy
+            let to = get('txtTo')
+            set('to', to)
             let refno = get('txtRefNo')
             set('refno', refno)
             let msg = get('txtMsg')
@@ -486,6 +521,8 @@
             } else {
                 show('msgRow')
             }
+
+            showErrorsIfPresent(validateRequest(to, amount, ccy))
 
             if(!isEditable) {
                 hide('successBox')
@@ -598,6 +635,10 @@
                         "payWith": "Überweisen mit {{name}}",
                         "edit": "Bearbeiten",
 
+                        "receiverMissing": "Empfänger/An fehlt",
+                        "amountMissing": "Betrag fehlt",
+                        "ccyMissing": "Währung fehlt",
+
                         "__dummy": ""
                     }
                 },
@@ -606,6 +647,10 @@
                         "preview": "Show preview",
                         "successfullySent": "Successfully sent payment request to {{name}}. This page can be closed at any time.",
                         "payWith": "Pay with {{name}}",
+
+                        "receiverMissing": "Receiver/to missing",
+                        "amountMissing": "Amount missing",
+                        "ccyMissing": "Currency missing",
 
                         "__dummy": ""
                     }

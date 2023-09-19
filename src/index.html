@@ -379,7 +379,7 @@
             document.getElementById('networkDisplayText').innerText = displayText
             selectedNetworkId = id
             // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
-            initPayWith(getCcy())
+            initPayWith(getCcy(), !document.getElementById('redirectRequest').disabled)
         }
 
         function hideError() {

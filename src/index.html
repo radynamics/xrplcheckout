@@ -210,13 +210,13 @@
                 document.getElementById('txtMsg').value = msg
             }
 
-            await initPayWith(ccy)
-
+            let errors = validateRequest(to, validAmountOrNull(), ccy)
+            initPayWith(ccy, errors.length === 0)
             if(isEditable) {
                 updateLink()
                 show('togglePreview')
             } else {
-                showErrorsIfPresent(validateRequest(to, validAmountOrNull(), ccy))
+                showErrorsIfPresent(errors)
             }
         }
         function empty(msg) {
@@ -341,12 +341,12 @@
 
             let p = getProcessor(id)
             window.localStorage.setItem('lastUsedProcessorId', p.id())
-            setProcessor(p)
+            setProcessor(p, true)
         }
-        function setProcessor(p) {
+        function setProcessor(p, payButtonEnabled) {
             processor = p
             document.getElementById('payWith').innerText = i18next.t('payWith', { name: processor.name() })
-            document.getElementById('redirectRequest').disabled = false
+            document.getElementById('redirectRequest').disabled = !payButtonEnabled
             document.getElementById('payAdviseText').innerText = processor.getPayAdviseText() === null ? '' : processor.getPayAdviseText()
         }
         function getProcessor(id) {
@@ -439,7 +439,7 @@
             }
         }
 
-        async function initPayWith(ccy) {
+        async function initPayWith(ccy, payButtonEnabled) {
             var usable = []
             const xrplClient = await createAndConnectXrplClient()
             let params = createProcessorParams()
@@ -484,7 +484,7 @@
                     break
                 }
             }
-            setProcessor(use)
+            setProcessor(use, payButtonEnabled)
         }
         function enableProcessor(p) {
             document.getElementById(`processor_${p.id()}`).disabled = false

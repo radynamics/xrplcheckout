@@ -260,8 +260,7 @@
 
         function showErrorsIfPresent(errors) {
             var hasErrors = errors.length !== 0
-            document.getElementById('redirectRequest').disabled = hasErrors
-            document.getElementById('changeProcessor').disabled = hasErrors
+            setPayButtonStatus(!hasErrors)
             if(!hasErrors) {
                 hideError()
                 return
@@ -295,22 +294,18 @@
         async function redirectRequest() {
             const xrplClient = await createAndConnectXrplClient()
             try {
-                document.getElementById('redirectRequest').disabled = true
-                document.getElementById('changeProcessor').disabled = true
+                setPayButtonStatus(false)
                 hideError()
                 hideSuccess()
 
                 const resp = await processor.pay(xrplClient, createProcessorParams())
                 hide('redirectBox')
                 showSuccess(i18next.t('successfullySent', { name: processor.name() }))
-                document.getElementById('redirectRequest').disabled = false
-                document.getElementById('changeProcessor').disabled = false
             } catch (err) {
                 showError(err.message)
-                document.getElementById('redirectRequest').disabled = false
-                document.getElementById('changeProcessor').disabled = false
             } finally {
                 xrplClient.disconnect()
+                setPayButtonStatus(true)
             }
         }
         function createProcessorParams() {
@@ -345,6 +340,7 @@
             processor = p
             if (processor == null) {
                 document.getElementById('payWith').innerText = i18next.t('noneAvailable')
+                // chance processor button remains enabled to allow a user to get infos about the reason.
                 document.getElementById('redirectRequest').disabled = true
                 document.getElementById('payAdviseText').innerText = ''
             } else {
@@ -362,6 +358,10 @@
             throw new Error(`Processor ${id} unknown`)
         }
 
+        function setPayButtonStatus(enabled) {
+            document.getElementById('redirectRequest').disabled = !enabled
+            document.getElementById('changeProcessor').disabled = !enabled
+        }
         async function createAndConnectXrplClient() {
             var url = null
             switch(selectedNetworkId) {

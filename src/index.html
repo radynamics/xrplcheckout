@@ -179,7 +179,8 @@
         var processor = null
 
         async function onLoad() {
-            await init()
+            let networkId = getOrNull("network") == null ? 'mainnet' : getOrNull("network")
+            await init(networkId)
 
             const queryParams = new URLSearchParams(window.location.search)
             let isEditable = queryParams.get('edit') === '1' || getOrNull('to') == null
@@ -321,6 +322,8 @@
             if(params.get('dt') !== null) result['destinationTag'] = trim(params.get('dt'))
             if(params.get('refno') !== null) result['referenceNo'] = trim(params.get('refno'))
             if(params.get('msg') !== null) result['message'] = trim(params.get('msg'))
+            result['network'] = selectedNetworkId
+
             return result
         }
         function trim(value) {
@@ -389,6 +392,7 @@
             showErrorsIfPresent(errors)
 
             initPayWith(getCcy(), errors.length === 0)
+            updateLink()
         }
 
         function hideError() {
@@ -413,7 +417,7 @@
             document.getElementById(id).classList.add('d-none')
         }
 
-        async function init() {
+        async function init(networkId) {
             let settingsFile = 'settings.json'
             await fetch(settingsFile).then (function (response) {
                 return response.json();
@@ -437,7 +441,7 @@
             allProcessors.push(new XummProcessor(settings))
             allProcessors.push(new DalliPay())
             allProcessors.push(new Crossmark())
-            networkChanged('mainnet')
+            networkChanged(networkId)
         }
         function settingsLoaded() {
             document.title = `${settings.provider.name} ` + i18next.t('pageTitle')
@@ -599,6 +603,7 @@
             if(!empty(refno)) path += '&refno=' + refno
             let msg = trim(get('txtMsg'))
             if(!empty(msg)) path += '&msg=' + msg
+            path += '&network=' + selectedNetworkId
             
             document.getElementById('txtPaymentRequestLink').value = path
             document.getElementById('openLink').href = path

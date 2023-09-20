@@ -460,7 +460,7 @@
                 errorMessage = err.message
             }
 
-            const messageTrustlineMissing = `Receiver doesn't have a TrustLine for ${params.currency}`
+            const messageTrustlineMissing = i18next.t('missingTrustline', { ccy: params.currency })
             const noneAvailableMessage = receiverAcceptsCcy ? null : messageTrustlineMissing
             errorMessage = errorMessage == null && !receiverAcceptsCcy ? messageTrustlineMissing : errorMessage
             for (var i = 0; i < allProcessors.length; i++) {
@@ -663,6 +663,7 @@
                         "edit": "Bearbeiten",
 
                         "receiverWalletNotActivated": "Wallet des Empfängers nicht aktiviert",
+                        "missingTrustline": "Empfänger hat keine TrustLine für {{ccy}}",
                         "receiverMissing": "Empfänger/An fehlt",
                         "amountMissing": "Betrag fehlt",
                         "ccyMissing": "Währung fehlt",
@@ -678,6 +679,7 @@
                         "payWith": "Pay with {{name}}",
 
                         "receiverWalletNotActivated": "Receiver wallet not activated",
+                        "missingTrustline": "Receiver doesn't have a TrustLine for {{ccy}}",
                         "receiverMissing": "Receiver/to missing",
                         "amountMissing": "Amount missing",
                         "ccyMissing": "Currency missing",

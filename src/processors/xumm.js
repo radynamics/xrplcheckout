@@ -21,13 +21,6 @@ export class XummProcessor {
             : { ready: false, reason: { text: `Missing value xumm.apiKey in settings.json`} }
     }
 
-    async supportsIOU(xrplClient, params) {
-        if(params.currency === 'XRP') return { supported: true }
-        return await XrplUtils.hasTrustline(xrplClient, params.to, params.currency)
-            ? { supported: true }
-            : { supported: false, reason: { text: `Receiver doesn't have a TrustLine for ${params.currency}`} }
-    }
-
     async pay(xrplClient, params) {
         var tx = await XrplUtils.createPayment(xrplClient, params.to, params.currency, params.amount, params.referenceNo, params.message)
 

@@ -169,6 +169,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script type="module" defer>
+        import * as XrplUtils from '../utils/xrpl.js'
         import { DalliPay } from "./processors/dallipay.js"
         import { XummProcessor } from "./processors/xumm.js"
         import { Crossmark } from "./processors/crossmark.js"
@@ -441,8 +442,8 @@
 
         async function initPayWith(ccy, payButtonEnabled) {
             var usable = []
-            const xrplClient = await createAndConnectXrplClient()
             let params = createProcessorParams()
+            const receiverAcceptsCcy = await isAccepting(params.to, params.currency)
             for (var i = 0; i < allProcessors.length; i++) {
                 var p = allProcessors[i]
 
@@ -458,19 +459,13 @@
                     continue
                 }
 
-                try {
-                    let iouResult = await p.supportsIOU(xrplClient, params)
-                    if (iouResult.supported) {
-                        enableProcessor(p)
-                        usable.push(p);
-                    } else {
-                        disableProcessor(p, iouResult.reason.text)
-                    }
-                } catch (err) {
-                    disableProcessor(p, `Error: ${err.message}`)
+                if (receiverAcceptsCcy) {
+                    enableProcessor(p)
+                    usable.push(p);
+                } else {
+                    disableProcessor(p, `Receiver doesn't have a TrustLine for ${params.currency}`)
                 }
             }
-            xrplClient.disconnect()
 
             if (usable.length === 0) {
                 return
@@ -485,6 +480,20 @@
                 }
             }
             setProcessor(use, payButtonEnabled)
+        }
+        async function isAccepting(wallet, ccy) {
+            if(ccy === 'XRP') {
+                return true
+            }
+            const xrplClient = await createAndConnectXrplClient()
+            try {
+                return await XrplUtils.hasTrustline(xrplClient, wallet, ccy)
+            } catch (err) {
+                showError(err.message)
+                return false
+            } finally {
+                xrplClient.disconnect()
+            }
         }
         function enableProcessor(p) {
             document.getElementById(`processor_${p.id()}`).disabled = false

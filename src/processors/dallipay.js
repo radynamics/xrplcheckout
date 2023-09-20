@@ -8,10 +8,6 @@ export class DalliPay {
         return { ready: true }
     }
 
-    async supportsIOU(xrplClient, params) {
-        return { supported: true }
-    }
-
     pay(xrplClient, params) {
         const localhostBaseUrl = 'http://127.0.0.1:58909/request';
         var parameters = this.#toQueryString(params)

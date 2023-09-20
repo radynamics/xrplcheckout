@@ -497,11 +497,14 @@
             setProcessor(use, payButtonEnabled)
         }
         async function isAccepting(wallet, ccy) {
-            if(ccy === 'XRP') {
-                return true
-            }
             const xrplClient = await createAndConnectXrplClient()
             try {
+                if(!await XrplUtils.isActivated(xrplClient, wallet)) {
+                    throw new Error(i18next.t('receiverWalletNotActivated'))
+                }
+                if(ccy === 'XRP') {
+                    return true
+                }
                 return await XrplUtils.hasTrustline(xrplClient, wallet, ccy)
             } catch (err) {
                 throw err
@@ -659,6 +662,7 @@
                         "payWith": "Überweisen mit {{name}}",
                         "edit": "Bearbeiten",
 
+                        "receiverWalletNotActivated": "Wallet des Empfängers nicht aktiviert",
                         "receiverMissing": "Empfänger/An fehlt",
                         "amountMissing": "Betrag fehlt",
                         "ccyMissing": "Währung fehlt",
@@ -673,6 +677,7 @@
                         "noneAvailable": "none available",
                         "payWith": "Pay with {{name}}",
 
+                        "receiverWalletNotActivated": "Receiver wallet not activated",
                         "receiverMissing": "Receiver/to missing",
                         "amountMissing": "Amount missing",
                         "ccyMissing": "Currency missing",

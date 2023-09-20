@@ -29,6 +29,18 @@ export function toMemos(referenceNo, freeText) {
     }]
 }
 
+export async function isActivated(xrplClient, wallet) {
+    try {
+        // Throws an exception 'Account not found.'
+        await xrplClient.request({
+            "command": "account_info",
+            "account": wallet
+        })
+        return true
+    } catch (err) {
+        return false
+    }
+}
 export async function hasTrustline(xrplClient, wallet, ccy) {
     let trustlines = await listTrustlines(xrplClient, wallet, ccy)
     return trustlines.length > 0

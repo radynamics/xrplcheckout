@@ -211,13 +211,9 @@
                 document.getElementById('txtMsg').value = msg
             }
 
-            let errors = validateRequest(to, validAmountOrNull(), ccy)
-            initPayWith(ccy, errors.length === 0)
             if(isEditable) {
                 updateLink()
                 show('togglePreview')
-            } else {
-                showErrorsIfPresent(errors)
             }
         }
         function empty(msg) {
@@ -267,6 +263,7 @@
             document.getElementById('redirectRequest').disabled = hasErrors
             document.getElementById('changeProcessor').disabled = hasErrors
             if(!hasErrors) {
+                hideError()
                 return
             }
 
@@ -346,9 +343,15 @@
         }
         function setProcessor(p, payButtonEnabled) {
             processor = p
-            document.getElementById('payWith').innerText = i18next.t('payWith', { name: processor.name() })
-            document.getElementById('redirectRequest').disabled = !payButtonEnabled
-            document.getElementById('payAdviseText').innerText = processor.getPayAdviseText() === null ? '' : processor.getPayAdviseText()
+            if (processor == null) {
+                document.getElementById('payWith').innerText = i18next.t('noneAvailable')
+                document.getElementById('redirectRequest').disabled = true
+                document.getElementById('payAdviseText').innerText = ''
+            } else {
+                document.getElementById('payWith').innerText = i18next.t('payWith', { name: processor.name() })
+                document.getElementById('redirectRequest').disabled = !payButtonEnabled
+                document.getElementById('payAdviseText').innerText = processor.getPayAdviseText() === null ? '' : processor.getPayAdviseText()
+            }
         }
         function getProcessor(id) {
             for(var i = 0; i < allProcessors.length; i++) {
@@ -379,8 +382,13 @@
             }
             document.getElementById('networkDisplayText').innerText = displayText
             selectedNetworkId = id
+
             // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
-            initPayWith(getCcy(), !document.getElementById('redirectRequest').disabled)
+            let params = createProcessorParams()
+            let errors = validateRequest(params.to, params.amount, params.currency)
+            showErrorsIfPresent(errors)
+
+            initPayWith(getCcy(), errors.length === 0)
         }
 
         function hideError() {
@@ -468,6 +476,7 @@
             }
 
             if (usable.length === 0) {
+                setProcessor(null, false)
                 return
             }
 
@@ -641,6 +650,7 @@
                         "tinyurlInfo": "Dienste wie <a href='https://tinyurl.com' target='_blank'>tinyurl.com</a> verkürzen die URL zur einfacheren Nutzung.",
 
                         "successfullySent": "Zahlungsanfrage erfolgreich an {{name}} geschickt. Diese Seite kann jederzeit geschlossen werden.",
+                        "noneAvailable": "keine verfügbar",
                         "payWith": "Überweisen mit {{name}}",
                         "edit": "Bearbeiten",
 
@@ -655,6 +665,7 @@
                     translation: {
                         "preview": "Show preview",
                         "successfullySent": "Successfully sent payment request to {{name}}. This page can be closed at any time.",
+                        "noneAvailable": "none available",
                         "payWith": "Pay with {{name}}",
 
                         "receiverMissing": "Receiver/to missing",

@@ -22,8 +22,8 @@
                     <span id="networkDisplayText" data-i18n="loading">loading</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#" id="mainnet">Mainnet</a></li>
-                    <li><a class="dropdown-item" href="#" id="testnet">Testnet</a></li>            
+                    <li><a class="dropdown-item" href="#" id="xrpl_mainnet">XRPL Mainnet</a></li>
+                    <li><a class="dropdown-item" href="#" id="xrpl_testnet">XRPL Testnet</a></li>            
                 </ul>
             </div>
         </div>
@@ -177,9 +177,10 @@
         var selectedNetworkId = null
         var allProcessors = []
         var processor = null
+        const DEFAULT_NETWORK_ID = 'xrpl_mainnet'
 
         async function onLoad() {
-            let networkId = getOrNull("network") == null ? 'mainnet' : getOrNull("network")
+            let networkId = getOrNull("network") == null ? DEFAULT_NETWORK_ID : getOrNull("network")
             await init(networkId)
 
             const queryParams = new URLSearchParams(window.location.search)
@@ -368,8 +369,8 @@
         async function createAndConnectXrplClient() {
             var url = null
             switch(selectedNetworkId) {
-                case 'mainnet': url = 'wss://xrplcluster.com'; break
-                case 'testnet': url = 'wss://s.altnet.rippletest.net:51233'; break
+                case 'xrpl_mainnet': url = 'wss://xrplcluster.com'; break
+                case 'xrpl_testnet': url = 'wss://s.altnet.rippletest.net:51233'; break
                 default: throw new Error(`${selectedNetworkId} unknown`)
             }
             let xrplClient = new xrpl.Client(url)
@@ -379,8 +380,8 @@
         function networkChanged(id) {
             var displayText = 'unknown'
             switch(id) {
-                case 'mainnet': displayText = 'Mainnet'; break
-                case 'testnet': displayText = 'Testnet'; break
+                case 'xrpl_mainnet': displayText = 'XRPL Mainnet'; break
+                case 'xrpl_testnet': displayText = 'XRPL Testnet'; break
                 default: throw new Error(`${id} unknown`)
             }
             document.getElementById('networkDisplayText').innerText = displayText
@@ -623,8 +624,8 @@
         document.getElementById('processor_dallipay').addEventListener('click', function() { processorChanged('processor_dallipay', DalliPay.id)});
         document.getElementById('processor_crossmark').addEventListener('click', function(e) { processorChanged('processor_crossmark', Crossmark.id) });
         document.getElementById('preview').addEventListener('click', previewClick);
-        document.getElementById('mainnet').addEventListener('click', function() { networkChanged('mainnet') });
-        document.getElementById('testnet').addEventListener('click', function() { networkChanged('testnet') });
+        document.getElementById('xrpl_mainnet').addEventListener('click', function() { networkChanged('xrpl_mainnet') });
+        document.getElementById('xrpl_testnet').addEventListener('click', function() { networkChanged('xrpl_testnet') });
 
         document.getElementById('txtAmount').addEventListener('change', formatAmount);
         document.getElementById('txtCcy').addEventListener('change', formatAmount);

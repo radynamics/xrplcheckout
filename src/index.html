@@ -451,7 +451,18 @@
         async function initPayWith(ccy, payButtonEnabled) {
             var usable = []
             let params = createProcessorParams()
-            const receiverAcceptsCcy = await isAccepting(params.to, params.currency)
+            let errorMessage = null
+            let receiverAcceptsCcy = false
+            try {
+                // May returns account not found (eg. wrong network)
+                receiverAcceptsCcy = await isAccepting(params.to, params.currency)
+            } catch (err) {
+                errorMessage = err.message
+            }
+
+            const messageTrustlineMissing = `Receiver doesn't have a TrustLine for ${params.currency}`
+            const noneAvailableMessage = receiverAcceptsCcy ? null : messageTrustlineMissing
+            errorMessage = errorMessage == null && !receiverAcceptsCcy ? messageTrustlineMissing : errorMessage
             for (var i = 0; i < allProcessors.length; i++) {
                 var p = allProcessors[i]
 
@@ -471,11 +482,12 @@
                     enableProcessor(p)
                     usable.push(p);
                 } else {
-                    disableProcessor(p, `Receiver doesn't have a TrustLine for ${params.currency}`)
+                    disableProcessor(p, errorMessage)
                 }
             }
 
             if (usable.length === 0) {
+                showError(errorMessage)
                 setProcessor(null, false)
                 return
             }
@@ -498,8 +510,7 @@
             try {
                 return await XrplUtils.hasTrustline(xrplClient, wallet, ccy)
             } catch (err) {
-                showError(err.message)
-                return false
+                throw err
             } finally {
                 xrplClient.disconnect()
             }

@@ -183,8 +183,7 @@
             let networkId = getOrNull("network") == null ? DEFAULT_NETWORK_ID : getOrNull("network")
             await init(networkId)
 
-            const queryParams = new URLSearchParams(window.location.search)
-            let isEditable = queryParams.get('edit') === '1' || getOrNull('to') == null
+            let isEditable = inEditMode()
             updateInputState(isEditable)
             
             let amount = amountFormatted()
@@ -258,6 +257,10 @@
         }
         function get(id) {
             return document.getElementById(id).value
+        }
+        function inEditMode() {
+            const queryParams = new URLSearchParams(window.location.search)
+            return queryParams.get('edit') === '1' || getOrNull('to') == null
         }
 
         function showErrorsIfPresent(errors) {
@@ -387,12 +390,15 @@
             document.getElementById('networkDisplayText').innerText = displayText
             selectedNetworkId = id
 
-            // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
-            let params = createProcessorParams()
-            let errors = validateRequest(params.to, params.amount, params.currency)
-            showErrorsIfPresent(errors)
+            // Don't show errors on an empty edit form.
+            if(!inEditMode()) {
+                // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
+                let params = createProcessorParams()
+                let errors = validateRequest(params.to, params.amount, params.currency)
+                showErrorsIfPresent(errors)
 
-            initPayWith(getCcy(), errors.length === 0)
+                initPayWith(getCcy(), errors.length === 0)
+            }
             updateLink()
         }
 
@@ -442,6 +448,7 @@
             allProcessors.push(new XummProcessor(settings))
             allProcessors.push(new DalliPay())
             allProcessors.push(new Crossmark())
+            setProcessor(null, false)
             networkChanged(networkId)
         }
         function settingsLoaded() {

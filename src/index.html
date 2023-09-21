@@ -560,7 +560,11 @@
                 show('msgRow')
             }
 
-            showErrorsIfPresent(validateRequest(to, amount, ccy))
+            let errors = validateRequest(to, amount, ccy)
+            if(processor == null) {
+                initPayWith(getCcy(), errors.length === 0)
+            }
+            showErrorsIfPresent(errors)
 
             if(!isEditable) {
                 hide('successBox')

@@ -604,10 +604,8 @@
             }
         }
         function updateLink() {
-            let path = window.location.href.split('?')[0]
-            // Hack needed to ensure new URLSearchParams(...) gets 'to' as param
-            path += '?1=1'
-            path += '&to=' + trim(get('txtTo'))
+            let path = `${window.location.origin}/`
+            path += '?to=' + trim(get('txtTo'))
             path += '&amount=' + get('txtAmount')
             let ccy = trim(getCcy())
             if(!empty(ccy)) path += '&currency=' + ccy

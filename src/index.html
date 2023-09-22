@@ -180,8 +180,7 @@
         const DEFAULT_NETWORK_ID = 'xrpl_mainnet'
 
         async function onLoad() {
-            let networkId = getOrNull("network") == null ? DEFAULT_NETWORK_ID : getOrNull("network")
-            await init(networkId)
+            await init()
 
             let isEditable = inEditMode()
             updateInputState(isEditable)
@@ -216,6 +215,9 @@
                 updateLink()
                 show('togglePreview')
             }
+
+            let networkId = getOrNull("network") == null ? DEFAULT_NETWORK_ID : getOrNull("network")
+            await networkChanged(networkId)
         }
         function empty(msg) {
             return msg === null || msg.length === 0
@@ -262,6 +264,9 @@
             const queryParams = new URLSearchParams(window.location.search)
             return queryParams.get('edit') === '1' || getOrNull('to') == null
         }
+        function isPreviewOrLiveMode() {
+            return isVisible('divLabelAmount')
+        }
 
         function showErrorsIfPresent(errors) {
             var hasErrors = errors.length !== 0
@@ -277,11 +282,21 @@
             }
             showError(errorMessages)
         }
-        function validateRequest(to, amount, ccy) {
+        async function validateRequest(to, amount, ccy) {
             var list = []
 
             if(to === undefined || to === '') {
                 list.push(i18next.t('receiverMissing'))
+            } else {
+                try {
+                    // May returns account not found (eg. wrong network)
+                    let receiverAcceptsCcy = await isAccepting(to, ccy)
+                    if(!receiverAcceptsCcy) {
+                        list.push(i18next.t('missingTrustline', { ccy: ccy }))
+                    }
+                } catch (err) {
+                    list.push(err.message)
+                }
             }
             if(amount === undefined || amount === null || amount === '' || amount === 0) {
                 list.push(i18next.t('amountMissing'))
@@ -380,7 +395,7 @@
             await xrplClient.connect()
             return xrplClient
         }
-        function networkChanged(id) {
+        async function networkChanged(id) {
             var displayText = 'unknown'
             switch(id) {
                 case 'xrpl_mainnet': displayText = 'XRPL Mainnet'; break
@@ -390,15 +405,16 @@
             document.getElementById('networkDisplayText').innerText = displayText
             selectedNetworkId = id
 
+            let errors = []
             // Don't show errors on an empty edit form.
-            if(!inEditMode()) {
-                // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
+            if(isPreviewOrLiveMode()) {
                 let params = createProcessorParams()
-                let errors = validateRequest(params.to, params.amount, params.currency)
-                showErrorsIfPresent(errors)
-
-                initPayWith(getCcy(), errors.length === 0)
+                // Eg Xumm canot be initialized if the receiver wallet isn't available on a network.
+                errors = await validateRequest(params.to, params.amount, params.currency)
             }
+            showErrorsIfPresent(errors)
+
+            initPayWith(getCcy(), errors.length === 0)
             updateLink()
         }
 
@@ -424,7 +440,7 @@
             document.getElementById(id).classList.add('d-none')
         }
 
-        async function init(networkId) {
+        async function init() {
             let settingsFile = 'settings.json'
             await fetch(settingsFile).then (function (response) {
                 return response.json();
@@ -449,7 +465,6 @@
             allProcessors.push(new DalliPay())
             allProcessors.push(new Crossmark())
             setProcessor(null, false)
-            networkChanged(networkId)
         }
         function settingsLoaded() {
             document.title = `${settings.provider.name} ` + i18next.t('pageTitle')
@@ -460,40 +475,23 @@
             }
         }
 
-        async function initPayWith(ccy, payButtonEnabled) {
+        function initPayWith(ccy, payButtonEnabled) {
             var usable = []
             let params = createProcessorParams()
-            let errorMessage = null
-            let receiverAcceptsCcy = false
-            try {
-                // May returns account not found (eg. wrong network)
-                receiverAcceptsCcy = await isAccepting(params.to, params.currency)
-            } catch (err) {
-                errorMessage = err.message
-            }
 
-            const messageTrustlineMissing = i18next.t('missingTrustline', { ccy: params.currency })
-            const noneAvailableMessage = receiverAcceptsCcy ? null : messageTrustlineMissing
-            errorMessage = errorMessage == null && !receiverAcceptsCcy ? messageTrustlineMissing : errorMessage
             for (var i = 0; i < allProcessors.length; i++) {
                 var p = allProcessors[i]
 
                 let readyResult = p.isReady()
-                if (!readyResult.ready) {
-                    disableProcessor(p, readyResult.reason.text)
-                    continue
-                }
-
-                if (receiverAcceptsCcy) {
+                if (readyResult.ready) {
                     enableProcessor(p)
                     usable.push(p);
                 } else {
-                    disableProcessor(p, errorMessage)
+                    disableProcessor(p, readyResult.reason.text)
                 }
             }
 
             if (usable.length === 0) {
-                showError(errorMessage)
                 setProcessor(null, false)
                 return
             }
@@ -560,11 +558,11 @@
                 show('msgRow')
             }
 
-            let errors = validateRequest(to, amount, ccy)
-            if(processor == null) {
-                await initPayWith(getCcy(), errors.length === 0)
-            }
+            let errors = await validateRequest(to, amount, ccy)
             showErrorsIfPresent(errors)
+            if(processor == null) {
+                initPayWith(getCcy(), errors.length === 0)
+            }
 
             if(!isEditable) {
                 hide('successBox')
@@ -605,7 +603,9 @@
         }
         function updateLink() {
             let path = `${window.location.origin}/`
-            path += '?to=' + trim(get('txtTo'))
+            // Hack needed to ensure new URLSearchParams(...) gets 'to' as param
+            path += '?1=1'
+            path += '&to=' + trim(get('txtTo'))
             path += '&amount=' + get('txtAmount')
             let ccy = trim(getCcy())
             if(!empty(ccy)) path += '&currency=' + ccy

@@ -1,8 +1,28 @@
 {
+    "pageTitle": "Payment Request",
+
+    "loading": "loading",
+    "to": "to:",
+    "unknown": "unknown",
+    "reference": "reference:",
+    "none": "none",
+    "message": "message:",
+    "messagePlaceholder": "Order 123-456",
+    "pleaseWait": "Please wait...",
+    "chooseAnotherPaymentMethod": "or choose another payment method",
+    "choosePaymentMethod": "Choose your payment method",
+    "close": "Close",
+    "whatIsXrpl": "What is XRPL?",
+    "gettingStartedWithXrpl": "Getting started with XRPL payments",
     "preview": "Show preview",
+    "paymentRequestLink": "Payment request link",
+    "open": "open",
+    "tinyurlInfo": "Services like <a href='https://tinyurl.com' target='_blank'>tinyurl.com</a> shorten the URL for your customers convenience.",
+
     "successfullySent": "Successfully sent payment request to {{name}}. This page can be closed at any time.",
     "noneAvailable": "none available",
     "payWith": "Pay with {{name}}",
+    "edit": "Edit",
 
     "receiverWalletNotActivated": "Receiver wallet not activated",
     "missingTrustline": "Receiver doesn't have a TrustLine for {{ccy}}",

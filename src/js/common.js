@@ -3,11 +3,13 @@
  * Proprietary and confidential
  * Written by Reto Steimen <rsteimen@radynamics.com>, 2023
  */
-function localizeAll(language, translations, onDone) {
+async function localizeAll(language, fallback, localesBasePath, onDone) {
+    let preferredLocale = language.length < 2 ? fallback : language.substring(0, 2)
+    var lang = await getLocale(localesBasePath, preferredLocale, fallback)
     i18next.init({
-        lng: getUiLocal(language),
+        lng: lang.code,
         /*debug: true,*/
-        resources: translations
+        resources: lang
     }).then(function(t) {
         var elements = document.querySelectorAll('*');
         for (i = 0; i < elements.length; i++) {
@@ -41,12 +43,17 @@ function localizeSrc(elem) {
         elem.src = i18next.t(attr.value);
     }
 }
-function getUiLocal(preferredLocale) {
-    var FALLBACK = 'en';
-    if (preferredLocale.length < 2) {
-        return FALLBACK;
-    }
-    var preferred = preferredLocale.substring(0, 2);
-    var AVAILABLE = ["de", "en"];
-    return AVAILABLE.indexOf(preferred) < 0 ? FALLBACK : preferred;
+
+async function getLocale(localesBasePath, locale, fallback) {
+    let code = locale
+    let translation = await fetch(`${localesBasePath}/${locale}.json`).then (function (response) {
+        return response.json()
+    }).then (function (data) {
+        return data
+    }).catch (function (error) {
+        // Language not available
+        translation = getLocale(localesBasePath, fallback)
+        code = fallback
+    })
+    return { code: code, [code]: { translation: translation } }
 }

@@ -1,0 +1,14 @@
+{
+    "preview": "Show preview",
+    "successfullySent": "Successfully sent payment request to {{name}}. This page can be closed at any time.",
+    "noneAvailable": "none available",
+    "payWith": "Pay with {{name}}",
+
+    "receiverWalletNotActivated": "Receiver wallet not activated",
+    "missingTrustline": "Receiver doesn't have a TrustLine for {{ccy}}",
+    "receiverMissing": "Receiver/to missing",
+    "amountMissing": "Amount missing",
+    "ccyMissing": "Currency missing",
+
+    "__dummy": ""
+}

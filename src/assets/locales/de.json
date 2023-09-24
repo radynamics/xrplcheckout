@@ -1,0 +1,34 @@
+{
+    "pageTitle": "Zahlungsanfrage",
+
+    "loading": "wird geladen",
+    "to": "An:",
+    "unknown": "unbekannt",
+    "reference": "Referenz:",
+    "none": "keine",
+    "message": "Mitteilung:",
+    "messagePlaceholder": "Bestellung 123-456",
+    "pleaseWait": "Bitte warten...",
+    "chooseAnotherPaymentMethod": "oder wählen Sie eine andere Zahlungsmethode",
+    "choosePaymentMethod": "Wählen Sie Ihre Zahlungsmethode",
+    "close": "Schliessen",
+    "whatIsXrpl": "Was ist XRPL?",
+    "gettingStartedWithXrpl": "Loslegen mit XRPL Zahlungen",
+    "preview": "Vorschau anzeigen",
+    "paymentRequestLink": "Zahlungsanfrage Link",
+    "open": "öffnen",
+    "tinyurlInfo": "Dienste wie <a href='https://tinyurl.com' target='_blank'>tinyurl.com</a> verkürzen die URL zur einfacheren Nutzung.",
+
+    "successfullySent": "Zahlungsanfrage erfolgreich an {{name}} geschickt. Diese Seite kann jederzeit geschlossen werden.",
+    "noneAvailable": "keine verfügbar",
+    "payWith": "Überweisen mit {{name}}",
+    "edit": "Bearbeiten",
+
+    "receiverWalletNotActivated": "Wallet des Empfängers nicht aktiviert",
+    "missingTrustline": "Empfänger hat keine TrustLine für {{ccy}}",
+    "receiverMissing": "Empfänger/An fehlt",
+    "amountMissing": "Betrag fehlt",
+    "ccyMissing": "Währung fehlt",
+
+    "__dummy": ""
+}

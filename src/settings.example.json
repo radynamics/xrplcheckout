@@ -4,7 +4,6 @@
         "name": "XRPL Checkout"
     },
     "xumm": {
-        "__apiKey": "__get_APIKey_from_Xumm_Developer_Console",
-        "apiKey": null
+        "apiKey": "your_APIKey_from_Xumm_Developer_Console"
     }
 }

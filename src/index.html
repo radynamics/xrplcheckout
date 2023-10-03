@@ -602,7 +602,7 @@
             }
         }
         function updateLink() {
-            let path = `${window.location.origin}/`
+            let path = `${window.location.origin}${window.location.pathname}`
             // Hack needed to ensure new URLSearchParams(...) gets 'to' as param
             path += '?1=1'
             path += '&to=' + trim(get('txtTo'))

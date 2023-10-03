@@ -602,7 +602,8 @@
             }
         }
         function updateLink() {
-            let path = `${window.location.origin}${window.location.pathname}`
+            // "https://www.abc.com/asdf/index.html" -> "https://www.abc.com/asdf/"
+            let path = window.location.href.slice(0, window.location.href.lastIndexOf('/') + 1)
             // Hack needed to ensure new URLSearchParams(...) gets 'to' as param
             path += '?1=1'
             path += '&to=' + trim(get('txtTo'))

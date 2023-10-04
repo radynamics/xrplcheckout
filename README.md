@@ -20,3 +20,9 @@ Simply create a new subfolder on your website and upload all files by FTP. No fu
 1. Create a new application in your [XUMM Developer Console](https://apps.xumm.dev/).
 2. In "Settings" make sure you define your XRPL Checkout path under "Origin/Redirect URIs". E.g. define https://www.google.com/xrplcheckout/?auth=true if your installation is accessible from https://www.google.com/xrplcheckout/.
 3. Copy "API Key" from the XUMM Developer Console ("Settings") and paste it into "settings.json" as the value for "xumm" "apiKey".
+
+### Configuring charges for TransferFee
+Depending on used IOU a [TransferFee](https://xrpl.org/transfer-fees.html) must be payed. In "settings.json" the fee behavior can be defined by:
+- [OUR] Payer payes the fee. Amount gets increases accordingly.
+- [BEN] (default) Beneficiary (receiver) pays the fee. Amount for payer remains the same.
+- [SHA] Fee is splitted 50/50 between payer and beneficiary. Amount gets increases accordingly.

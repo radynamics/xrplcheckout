@@ -178,6 +178,7 @@
         var allProcessors = []
         var processor = null
         const DEFAULT_NETWORK_ID = 'xrpl_mainnet'
+        const DEFAULT_CHARGES = 'BEN'
 
         async function onLoad() {
             await init()
@@ -342,6 +343,7 @@
             if(params.get('refno') !== null) result['referenceNo'] = trim(params.get('refno'))
             if(params.get('msg') !== null) result['message'] = trim(params.get('msg'))
             result['network'] = selectedNetworkId
+            result['charges'] = settings.charges === undefined ? DEFAULT_CHARGES : settings.charges.toUpperCase()
 
             return result
         }
@@ -453,6 +455,7 @@
                         imagePath: 'assets/productIcon.png',
                         name: 'XRPL Checkout'
                     },
+                    charges: DEFAULT_CHARGES,
                     xumm: {
                         apiKey: null
                     }

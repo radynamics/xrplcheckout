@@ -3,6 +3,8 @@
         "imagePath": "assets/productIcon.png",
         "name": "XRPL Checkout"
     },
+    "__charges_comment": "[charges] can be payed by BEN (beneficiary), OUR (payer), SHA (shared 50/50)",
+    "charges": "BEN",
     "xumm": {
         "apiKey": "your_APIKey_from_Xumm_Developer_Console"
     }

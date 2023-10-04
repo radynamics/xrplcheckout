@@ -62,7 +62,19 @@ export async function listTrustlines(xrplClient, wallet, ccy) {
     return lines
 }
 
-export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message) {
+async function getTransferRateOrZero(xrplClient, wallet) {
+    const response = await xrplClient.request({
+        "command": "account_info",
+        "account": wallet
+    })
+
+    const zeroFee = 1000000000
+    let rate = response.result.account_data.TransferRate === null ? zeroFee : response.result.account_data.TransferRate
+    // Return rate as value between 0.0 (0%) and 1.0 (100%)
+    return (new Number(rate) - zeroFee) / zeroFee
+}
+
+export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message, charges) {
     var tx = {
         TransactionType: 'Payment',
         Destination: to
@@ -74,8 +86,28 @@ export async function createPayment(xrplClient, to, ccy, amt, referenceNo, messa
         // Requirement: Receiver must have a trustline to the expected currency
         let trustlines = await listTrustlines(xrplClient, to, ccy)
         var issuer = trustlines[0].account
-        var amount = toAmount(amt, ccy, issuer)
-        tx.Amount = amount
+        var transferRate = await getTransferRateOrZero(xrplClient, issuer)
+        var transferFee = amt * transferRate
+
+        let feeAmount = 0, feeSendMax = 0
+        switch(charges) {
+            case 'OUR':
+                feeAmount += transferFee
+                feeSendMax += transferFee
+                break;
+            case 'BEN':
+            default:
+                // automatically deducted
+                break;
+            case 'SHA':
+                feeAmount += transferFee * 0.5
+                feeSendMax += transferFee * 0.5
+                break;
+        }
+        tx.Amount = toAmount(amt + feeAmount, ccy, issuer)
+        if(feeSendMax > 0) {
+            tx.SendMax = toAmount(amt + feeSendMax, ccy, issuer)
+        }
     }
 
     var memos = toMemos(referenceNo, message)

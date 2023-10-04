@@ -24,6 +24,7 @@ export class DalliPay {
         if(params.destinationTag !== undefined) result += `&dt=${params.destinationTag}`
         if(params.referenceNo !== undefined) result += `&refno=${params.referenceNo}`
         if(params.message !== undefined) result += `&msg=${params.message}`
+        if(params.charges !== undefined) result += `&charges=${params.charges}`
         return result
     }
 }

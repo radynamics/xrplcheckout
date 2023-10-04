@@ -22,7 +22,7 @@ export class XummProcessor {
     }
 
     async pay(xrplClient, params) {
-        var tx = await XrplUtils.createPayment(xrplClient, params.to, params.currency, params.amount, params.referenceNo, params.message)
+        var tx = await XrplUtils.createPayment(xrplClient, params.to, params.currency, params.amount, params.referenceNo, params.message, params.charges)
 
         this.xummSdk.authorize()
         return this.xummSdk.payload.create(tx)

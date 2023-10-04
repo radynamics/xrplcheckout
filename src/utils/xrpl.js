@@ -62,9 +62,11 @@ export async function listTrustlines(xrplClient, wallet, ccy) {
     return lines
 }
 
-export async function createPayment(xrplClient, to, ccy, amount, referenceNo, message) {
+export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message) {
     // Requirement: Receiver must have a trustline to the expected currency
-    var amount = await toAmount(xrplClient, to, ccy, amount)
+    let trustlines = await listTrustlines(xrplClient, to, ccy)
+    var issuer = trustlines[0].account
+    var amount = toAmount(amt, ccy, issuer)
 
     var tx = {
         TransactionType: 'Payment',
@@ -104,15 +106,25 @@ export function fromCurrencyCode(code) {
     return code.length <= ccyCodeStandardFormatLength ? code : stringToHex(code).padEnd(40, '0');
 }
 
-export async function toAmount(xrplClient, wallet, ccy, amount) {
-    if (ccy === 'XRP') {
+function toAmount(amount, ccy, issuer) {
+    if (isNativeCcy(ccy)) {
         return String(xrpToDrops(amount))
     } else {
-        let trustlines = await listTrustlines(xrplClient, wallet, ccy)
+        // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
+        let rounded = round(amount, 15)
         return {
             "currency" : fromCurrencyCode(ccy),
-            "value" : String(amount),
-            "issuer" : trustlines[0].account
+            "value" : String(rounded),
+            "issuer" : issuer
         }
     }
+}
+function isNativeCcy(ccy) {
+    return ccy === 'XRP'
+}
+
+function round(num, decimalPlaces) {
+    var p = Math.pow(10, decimalPlaces || 0);
+    var n = (num * p) * (1 + Number.EPSILON);
+    return Math.round(n) / p;
 }

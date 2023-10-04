@@ -63,15 +63,19 @@ export async function listTrustlines(xrplClient, wallet, ccy) {
 }
 
 export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message) {
-    // Requirement: Receiver must have a trustline to the expected currency
-    let trustlines = await listTrustlines(xrplClient, to, ccy)
-    var issuer = trustlines[0].account
-    var amount = toAmount(amt, ccy, issuer)
-
     var tx = {
         TransactionType: 'Payment',
-        Destination: to,
-        Amount: amount
+        Destination: to
+    }
+
+    if(isNativeCcy(ccy)) {
+        tx.Amount = toAmount(amt, ccy, issuer)
+    } else {
+        // Requirement: Receiver must have a trustline to the expected currency
+        let trustlines = await listTrustlines(xrplClient, to, ccy)
+        var issuer = trustlines[0].account
+        var amount = toAmount(amt, ccy, issuer)
+        tx.Amount = amount
     }
 
     var memos = toMemos(referenceNo, message)

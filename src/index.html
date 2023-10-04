@@ -336,7 +336,7 @@
         function toProcessorPayParams(params) {
             var result = {}
             if(params.get('to') !== null) result['to'] = trim(params.get('to'))
-            if(params.get('amount') !== null) result['amount'] = params.get('amount')
+            if(params.get('amount') !== null) result['amount'] = new Number(params.get('amount'))
             if(params.get('currency') !== null) result['currency'] = trim(params.get('currency'))
             if(params.get('dt') !== null) result['destinationTag'] = trim(params.get('dt'))
             if(params.get('refno') !== null) result['referenceNo'] = trim(params.get('refno'))

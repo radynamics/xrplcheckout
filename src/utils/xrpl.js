@@ -100,6 +100,7 @@ export async function createPayment(xrplClient, to, ccy, amt, referenceNo, messa
                 // automatically deducted
                 break;
             case 'SHA':
+                // the other half gets automatically deducted
                 feeAmount += transferFee * 0.5
                 feeSendMax += transferFee * 0.5
                 break;

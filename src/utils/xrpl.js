@@ -161,7 +161,6 @@ function isNativeCcy(ccy) {
 }
 
 function round(num, decimalPlaces) {
-    var p = Math.pow(10, decimalPlaces || 0);
-    var n = (num * p) * (1 + Number.EPSILON);
-    return Math.round(n) / p;
+    var p = Math.pow(10, decimalPlaces || 0)
+    return Math.round( num * p + Number.EPSILON ) / p
 }

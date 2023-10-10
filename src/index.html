@@ -256,7 +256,7 @@
             }
         }
         function getCcy() {
-            return get('txtCcy').toUpperCase()
+            return trim(get('txtCcy')).toUpperCase()
         }
         function get(id) {
             return document.getElementById(id).value
@@ -540,11 +540,11 @@
             document.getElementById('amount').innerText = amount
             let ccy = getCcy()
             document.getElementById('ccy').innerText = ccy
-            let to = get('txtTo')
+            let to = trim(get('txtTo'))
             set('to', to)
-            let refno = get('txtRefNo')
+            let refno = trim(get('txtRefNo'))
             set('refno', refno)
-            let msg = get('txtMsg')
+            let msg = trim(get('txtMsg'))
             set('msg', msg)
 
             let isEditable = isVisible('divInputAmount')

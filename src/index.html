@@ -444,7 +444,7 @@
 
         async function init() {
             let settingsFile = 'settings.json'
-            await fetch(settingsFile).then (function (response) {
+            await fetch(settingsFile, { cache: "reload" }).then (function (response) {
                 return response.json();
             }).then (function (data) {
                 settings = data

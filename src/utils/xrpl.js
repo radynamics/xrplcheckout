@@ -156,7 +156,7 @@ function toAmount(amount, ccy, issuer) {
         }
     }
 }
-async function isNativeCcy(ccy) {
+export function isNativeCcy(ccy) {
     return ccy === 'XRP'
 }
 

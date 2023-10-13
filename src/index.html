@@ -515,7 +515,7 @@
                 if(!await XrplUtils.isActivated(xrplClient, wallet)) {
                     throw new Error(i18next.t('receiverWalletNotActivated'))
                 }
-                if(ccy === 'XRP') {
+                if(XrplUtils.isNativeCcy(ccy)) {
                     return true
                 }
                 return await XrplUtils.hasTrustline(xrplClient, wallet, ccy)

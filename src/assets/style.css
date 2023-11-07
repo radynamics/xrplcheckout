@@ -4,3 +4,6 @@
 .cursor-pointer {
     cursor: pointer;
 }
+.x-small {
+    font-size: 70%;
+}

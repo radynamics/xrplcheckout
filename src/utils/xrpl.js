@@ -74,6 +74,32 @@ async function getTransferRateOrZero(xrplClient, wallet) {
     return (new Number(rate) - zeroFee) / zeroFee
 }
 
+export async function getTranferFees(xrplClient, to, amt, ccy, charges) {
+    if(isNativeCcy(ccy)) {
+        return { sender: 0, receiver: 0, issuer: null }
+    }
+
+    // Requirement: Receiver must have a trustline to the expected currency
+    let trustlines = await listTrustlines(xrplClient, to, ccy)
+    if(trustlines.length == 0) {
+        return { sender: 0, receiver: 0, issuer: null }
+    }
+    var issuer = trustlines[0].account
+    var transferRate = await getTransferRateOrZero(xrplClient, issuer)    
+
+    var transferFee = amt * transferRate
+    switch(charges) {
+        case 'OUR':
+            return { sender: transferFee, receiver: 0, issuer: issuer }
+        case 'BEN':
+        default:
+            return { sender: 0, receiver: transferFee, issuer: issuer }
+        case 'SHA':
+            // the other half gets automatically deducted
+            return { sender: transferFee * 0.5, receiver: transferFee * 0.5, issuer: issuer }
+    }
+}
+
 export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message, charges) {
     var tx = {
         TransactionType: 'Payment',
@@ -81,19 +107,14 @@ export async function createPayment(xrplClient, to, ccy, amt, referenceNo, messa
     }
 
     if(isNativeCcy(ccy)) {
-        tx.Amount = toAmount(amt, ccy, issuer)
+        tx.Amount = toAmount(amt, ccy, null)
     } else {
-        // Requirement: Receiver must have a trustline to the expected currency
-        let trustlines = await listTrustlines(xrplClient, to, ccy)
-        var issuer = trustlines[0].account
-        var transferRate = await getTransferRateOrZero(xrplClient, issuer)
-        var transferFee = amt * transferRate
-
+        let transferFees = await getTranferFees(xrplClient, to, amt, ccy, charges)
         let feeAmount = 0, feeSendMax = 0
         switch(charges) {
             case 'OUR':
-                feeAmount += transferFee
-                feeSendMax += transferFee
+                feeAmount += transferFees.sender
+                feeSendMax += transferFees.sender
                 break;
             case 'BEN':
             default:
@@ -101,13 +122,13 @@ export async function createPayment(xrplClient, to, ccy, amt, referenceNo, messa
                 break;
             case 'SHA':
                 // the other half gets automatically deducted
-                feeAmount += transferFee * 0.5
-                feeSendMax += transferFee * 0.5
+                feeAmount += transferFees.sender
+                feeSendMax += transferFees.sender
                 break;
         }
-        tx.Amount = toAmount(amt + feeAmount, ccy, issuer)
+        tx.Amount = toAmount(amt + feeAmount, ccy, transferFees.issuer)
         if(feeSendMax > 0) {
-            tx.SendMax = toAmount(amt + feeSendMax, ccy, issuer)
+            tx.SendMax = toAmount(amt + feeSendMax, ccy, transferFees.issuer)
         }
     }
 

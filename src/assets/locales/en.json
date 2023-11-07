@@ -1,6 +1,10 @@
 {
     "pageTitle": "Payment Request",
 
+    "tooltipFees": "Additional fee of currency issuer ({{chargesText}})",
+    "sha": "shared",
+    "ben": "paid by recipient",
+    "our": "paid by payer",
     "loading": "loading",
     "to": "to:",
     "unknown": "unknown",

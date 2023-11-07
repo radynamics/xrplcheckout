@@ -1,6 +1,10 @@
 {
     "pageTitle": "Zahlungsanfrage",
 
+    "tooltipFees": "Zusätzliche Gebühr des Emittenten der Währung ({{chargesText}})",
+    "sha": "geteilt",
+    "ben": "vom Empfänger bezahlt",
+    "our": "vom Zahler bezahlt",
     "loading": "wird geladen",
     "to": "An:",
     "unknown": "unbekannt",

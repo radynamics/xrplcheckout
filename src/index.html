@@ -200,7 +200,8 @@
             document.getElementById('amount').innerText = amount
             document.getElementById('txtAmount').value = validAmountOrNull() === null ? '' : amount
             var ccy = getOrNull('currency')
-            ccy = ccy === null ? 'XRP' : ccy
+            let networkId = getOrNull("network") == null ? DEFAULT_NETWORK_ID : getOrNull("network")
+            ccy = ccy === null ? XrplUtils.getNetwork(networkId).nativeCcy : ccy
             document.getElementById('ccy').innerText = ccy
             document.getElementById('txtCcy').value = ccy
 
@@ -227,7 +228,6 @@
                 show('togglePreview')
             }
 
-            let networkId = getOrNull("network") == null ? DEFAULT_NETWORK_ID : getOrNull("network")
             await networkChanged(networkId)
 
             refreshTransferFee(to, validAmountOrNull(), ccy)
@@ -659,7 +659,7 @@
         }
 
         function formatAmount() {
-            if (getCcy() === 'XRP') {
+            if (XrplUtils.isNativeCcy(getCcy())) {
                 return
             }
             const txtAmount = document.getElementById('txtAmount')

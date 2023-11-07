@@ -69,7 +69,7 @@ async function getTransferRateOrZero(xrplClient, wallet) {
     })
 
     const zeroFee = 1000000000
-    let rate = response.result.account_data.TransferRate === null ? zeroFee : response.result.account_data.TransferRate
+    let rate = response.result.account_data.TransferRate === undefined ? zeroFee : response.result.account_data.TransferRate
     // Return rate as value between 0.0 (0%) and 1.0 (100%)
     return (new Number(rate) - zeroFee) / zeroFee
 }

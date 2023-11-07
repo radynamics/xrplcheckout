@@ -1,8 +1,8 @@
 let networks = {}
-networks['xrpl_mainnet'] = { networkId: 0, nativeCcy: 'XRP' }
-networks['xrpl_testnet'] = { networkId: 1, nativeCcy: 'XRP' }
-networks['xahau_mainnet'] = { networkId: 21337, nativeCcy: 'XAH' }
-networks['xahau_testnet'] = { networkId: 21338, nativeCcy: 'XAH' }
+networks['xrpl_mainnet'] = { networkId: 0, nativeCcy: 'XRP', displayText: 'XRP Ledger', wss: 'wss://xrplcluster.com' }
+networks['xrpl_testnet'] = { networkId: 1, nativeCcy: 'XRP', displayText: 'XRPL Testnet', wss: 'wss://s.altnet.rippletest.net:51233' }
+networks['xahau_mainnet'] = { networkId: 21337, nativeCcy: 'XAH', displayText: 'Xahau', wss: 'wss://xahau.network' }
+networks['xahau_testnet'] = { networkId: 21338, nativeCcy: 'XAH', displayText: 'Xahau Testnet', wss: 'wss://xahau-test.net' }
 
 export function xrpToDrops(xrp) {
     return xrp * 1000000;

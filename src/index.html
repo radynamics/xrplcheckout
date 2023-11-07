@@ -22,8 +22,10 @@
                     <span id="networkDisplayText" data-i18n="loading">loading</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#" id="xrpl_mainnet">XRPL Mainnet</a></li>
-                    <li><a class="dropdown-item" href="#" id="xahau_mainnet">Xahau Mainnet</a></li>
+                    <li><span class="text-secondary small disabled ps-2">Networks</span></li>
+                    <li><a class="dropdown-item" href="#" id="xrpl_mainnet">XRP Ledger</a></li>
+                    <li><a class="dropdown-item" href="#" id="xahau_mainnet">Xahau</a></li>
+                    <li><span class="text-secondary small disabled ps-2">Testnets</span></li>
                     <li><a class="dropdown-item text-secondary" href="#" id="xrpl_testnet">XRPL Testnet</a></li>            
                     <li><a class="dropdown-item text-secondary" href="#" id="xahau_testnet">Xahau Testnet</a></li>            
                 </ul>
@@ -430,28 +432,12 @@
             document.getElementById('changeProcessor').disabled = !enabled
         }
         async function createAndConnectXrplClient() {
-            var url = null
-            switch(selectedNetworkId) {
-                case 'xrpl_mainnet': url = 'wss://xrplcluster.com'; break
-                case 'xahau_mainnet': url = 'wss://xahau.network'; break
-                case 'xrpl_testnet': url = 'wss://s.altnet.rippletest.net:51233'; break
-                case 'xahau_testnet': url = 'wss://xahau-test.net'; break
-                default: throw new Error(`${selectedNetworkId} unknown`)
-            }
-            let xrplClient = new xrpl.Client(url)
+            let xrplClient = new xrpl.Client(XrplUtils.getNetwork(selectedNetworkId).wss)
             await xrplClient.connect()
             return xrplClient
         }
         async function networkChanged(id) {
-            var displayText = 'unknown'
-            switch(id) {
-                case 'xrpl_mainnet': displayText = 'XRPL Mainnet'; break
-                case 'xahau_mainnet': displayText = 'Xahau Mainnet'; break
-                case 'xrpl_testnet': displayText = 'XRPL Testnet'; break
-                case 'xahau_testnet': displayText = 'Xahau Testnet'; break
-                default: throw new Error(`${id} unknown`)
-            }
-            document.getElementById('networkDisplayText').innerText = displayText
+            document.getElementById('networkDisplayText').innerText = XrplUtils.getNetwork(id).displayText
             selectedNetworkId = id
 
             let errors = []

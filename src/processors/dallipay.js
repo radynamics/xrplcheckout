@@ -1,3 +1,5 @@
+import * as XrplUtils from '../utils/xrpl.js'
+
 export class DalliPay {
     static id = "dallipay"
     id() { return DalliPay.id }
@@ -25,6 +27,8 @@ export class DalliPay {
         if(params.referenceNo !== undefined) result += `&refno=${params.referenceNo}`
         if(params.message !== undefined) result += `&msg=${params.message}`
         if(params.charges !== undefined) result += `&charges=${params.charges}`
+        let network = XrplUtils.getNetwork(params.networkKey)
+        result += `&networkId=${network.networkId}`
         return result
     }
 }

@@ -15,7 +15,7 @@ export class Crossmark {
     }
 
     async pay(xrplClient, params) {
-        var tx = await XrplUtils.createPayment(xrplClient, params.to, params.currency, params.amount, params.referenceNo, params.message, params.charges)
+        var tx = await XrplUtils.createPayment(xrplClient, params.to, params.currency, params.amount, params.referenceNo, params.message, params.charges, params.networkKey)
 
         let signIn = await sdk.signInAndWait()
         // User may rejected

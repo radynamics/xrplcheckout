@@ -23,7 +23,9 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="#" id="xrpl_mainnet">XRPL Mainnet</a></li>
+                    <li><a class="dropdown-item" href="#" id="xahau_mainnet">Xahau Mainnet</a></li>
                     <li><a class="dropdown-item" href="#" id="xrpl_testnet">XRPL Testnet</a></li>            
+                    <li><a class="dropdown-item" href="#" id="xahau_testnet">Xahau Testnet</a></li>            
                 </ul>
             </div>
         </div>
@@ -278,7 +280,7 @@
         }
 
         async function refreshTransferFee(to, amt, ccy) {
-            if(XrplUtils.isNativeCcy(ccy)) {
+            if(XrplUtils.isNativeCcy(ccy, selectedNetworkId)) {
                 hide('fees')
                 return
             }
@@ -286,7 +288,7 @@
             let charges = getCharges()
             let transferFees = null
             try {
-                transferFees = await XrplUtils.getTranferFees(xrplClient, to, amt, ccy, charges)
+                transferFees = await XrplUtils.getTranferFees(xrplClient, to, amt, ccy, charges, selectedNetworkId)
             } catch (err) {
                 hide('fees')
                 throw err
@@ -374,7 +376,7 @@
             if(params.get('dt') !== null) result['destinationTag'] = trim(params.get('dt'))
             if(params.get('refno') !== null) result['referenceNo'] = trim(params.get('refno'))
             if(params.get('msg') !== null) result['message'] = trim(params.get('msg'))
-            result['network'] = selectedNetworkId
+            result['networkKey'] = selectedNetworkId
             result['charges'] = getCharges()
 
             return result
@@ -431,7 +433,9 @@
             var url = null
             switch(selectedNetworkId) {
                 case 'xrpl_mainnet': url = 'wss://xrplcluster.com'; break
+                case 'xahau_mainnet': url = 'wss://xahau.network'; break
                 case 'xrpl_testnet': url = 'wss://s.altnet.rippletest.net:51233'; break
+                case 'xahau_testnet': url = 'wss://xahau-test.net'; break
                 default: throw new Error(`${selectedNetworkId} unknown`)
             }
             let xrplClient = new xrpl.Client(url)
@@ -442,7 +446,9 @@
             var displayText = 'unknown'
             switch(id) {
                 case 'xrpl_mainnet': displayText = 'XRPL Mainnet'; break
+                case 'xahau_mainnet': displayText = 'Xahau Mainnet'; break
                 case 'xrpl_testnet': displayText = 'XRPL Testnet'; break
+                case 'xahau_testnet': displayText = 'Xahau Testnet'; break
                 default: throw new Error(`${id} unknown`)
             }
             document.getElementById('networkDisplayText').innerText = displayText
@@ -557,7 +563,7 @@
                 if(!await XrplUtils.isActivated(xrplClient, wallet)) {
                     throw new Error(i18next.t('receiverWalletNotActivated'))
                 }
-                if(XrplUtils.isNativeCcy(ccy)) {
+                if(XrplUtils.isNativeCcy(ccy, selectedNetworkId)) {
                     return true
                 }
                 return await XrplUtils.hasTrustline(xrplClient, wallet, ccy)
@@ -681,7 +687,9 @@
         document.getElementById('processor_crossmark').addEventListener('click', function(e) { processorChanged('processor_crossmark', Crossmark.id) });
         document.getElementById('preview').addEventListener('click', previewClick);
         document.getElementById('xrpl_mainnet').addEventListener('click', function() { networkChanged('xrpl_mainnet') });
+        document.getElementById('xahau_mainnet').addEventListener('click', function() { networkChanged('xahau_mainnet') });
         document.getElementById('xrpl_testnet').addEventListener('click', function() { networkChanged('xrpl_testnet') });
+        document.getElementById('xahau_testnet').addEventListener('click', function() { networkChanged('xahau_testnet') });
 
         document.getElementById('txtAmount').addEventListener('change', formatAmount);
         document.getElementById('txtCcy').addEventListener('change', formatAmount);

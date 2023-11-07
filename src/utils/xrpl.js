@@ -1,3 +1,9 @@
+let networks = {}
+networks['xrpl_mainnet'] = { networkId: 0, nativeCcy: 'XRP' }
+networks['xrpl_testnet'] = { networkId: 1, nativeCcy: 'XRP' }
+networks['xahau_mainnet'] = { networkId: 21337, nativeCcy: 'XAH' }
+networks['xahau_testnet'] = { networkId: 21338, nativeCcy: 'XAH' }
+
 export function xrpToDrops(xrp) {
     return xrp * 1000000;
 }
@@ -74,8 +80,8 @@ async function getTransferRateOrZero(xrplClient, wallet) {
     return (new Number(rate) - zeroFee) / zeroFee
 }
 
-export async function getTranferFees(xrplClient, to, amt, ccy, charges) {
-    if(isNativeCcy(ccy)) {
+export async function getTranferFees(xrplClient, to, amt, ccy, charges, networkKey) {
+    if(isNativeCcy(ccy, networkKey)) {
         return { sender: 0, receiver: 0, issuer: null }
     }
 
@@ -100,16 +106,16 @@ export async function getTranferFees(xrplClient, to, amt, ccy, charges) {
     }
 }
 
-export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message, charges) {
+export async function createPayment(xrplClient, to, ccy, amt, referenceNo, message, charges, networkKey) {
     var tx = {
         TransactionType: 'Payment',
         Destination: to
     }
 
-    if(isNativeCcy(ccy)) {
-        tx.Amount = toAmount(amt, ccy, null)
+    if(isNativeCcy(ccy, networkKey)) {
+        tx.Amount = toAmount(amt, ccy, null, networkKey)
     } else {
-        let transferFees = await getTranferFees(xrplClient, to, amt, ccy, charges)
+        let transferFees = await getTranferFees(xrplClient, to, amt, ccy, charges, networkKey)
         let feeAmount = 0, feeSendMax = 0
         switch(charges) {
             case 'OUR':
@@ -126,9 +132,9 @@ export async function createPayment(xrplClient, to, ccy, amt, referenceNo, messa
                 feeSendMax += transferFees.sender
                 break;
         }
-        tx.Amount = toAmount(amt + feeAmount, ccy, transferFees.issuer)
+        tx.Amount = toAmount(amt + feeAmount, ccy, transferFees.issuer, networkKey)
         if(feeSendMax > 0) {
-            tx.SendMax = toAmount(amt + feeSendMax, ccy, transferFees.issuer)
+            tx.SendMax = toAmount(amt + feeSendMax, ccy, transferFees.issuer, networkKey)
         }
     }
 
@@ -136,6 +142,14 @@ export async function createPayment(xrplClient, to, ccy, amt, referenceNo, messa
     if(memos !== null) {
         tx.Memos = memos
     }
+
+    // For compatibility with existing chains, the NetworkID field must be omitted on any network with a Network ID of 1024 or less,
+    // but must be included on any network with a Network ID of 1025 or greater. (https://xrpl.org/transaction-common-fields.html#networkid-field)
+    let network = networks[networkKey]
+    if(network !== undefined && network.networkId >= 1025) {
+        tx.NetworkID = network.networkId
+    }
+
     return tx
 }
 
@@ -164,8 +178,8 @@ export function fromCurrencyCode(code) {
     return code.length <= ccyCodeStandardFormatLength ? code : stringToHex(code).padEnd(40, '0');
 }
 
-function toAmount(amount, ccy, issuer) {
-    if (isNativeCcy(ccy)) {
+function toAmount(amount, ccy, issuer, networkKey) {
+    if (isNativeCcy(ccy, networkKey)) {
         return String(xrpToDrops(amount))
     } else {
         // 15 decimal digits of precision (Token Precision, https://xrpl.org/currency-formats.html)
@@ -177,8 +191,15 @@ function toAmount(amount, ccy, issuer) {
         }
     }
 }
-export function isNativeCcy(ccy) {
-    return ccy === 'XRP'
+export function isNativeCcy(ccy, networkKey) {
+    return ccy === getNetwork(networkKey).nativeCcy
+}
+export function getNetwork(key) {
+    let network = networks[key]
+    if(network === undefined) {
+        throw new Error(`Unknown network ${key}`)
+    }
+    return network
 }
 
 function round(num, decimalPlaces) {

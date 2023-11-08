@@ -659,7 +659,7 @@
         }
 
         function formatAmount() {
-            if (XrplUtils.isNativeCcy(getCcy())) {
+            if (XrplUtils.isNativeCcy(getCcy(), selectedNetworkId)) {
                 return
             }
             const txtAmount = document.getElementById('txtAmount')

@@ -178,7 +178,7 @@ export function fromCurrencyCode(code) {
     return code.length <= ccyCodeStandardFormatLength ? code : stringToHex(code).padEnd(40, '0');
 }
 
-function toAmount(amount, ccy, issuer, networkKey) {
+export function toAmount(amount, ccy, issuer, networkKey) {
     if (isNativeCcy(ccy, networkKey)) {
         return String(xrpToDrops(amount))
     } else {

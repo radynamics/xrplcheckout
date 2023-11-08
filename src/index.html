@@ -299,7 +299,9 @@
                 hide('fees')
                 return
             }
-            document.getElementById('feeAmount').innerText = transferFees.sender
+            // Round
+            let feeAmount = XrplUtils.toAmount(transferFees.sender, ccy, transferFees.issuer, selectedNetworkId)
+            document.getElementById('feeAmount').innerText = feeAmount.value
             document.getElementById('feeCcy').innerText = ccy
             bootstrap.Tooltip.getInstance('#fees').setContent({'.tooltip-inner': i18next.t('tooltipFees', { chargesText: getChargesText(charges) })})
             show('fees')

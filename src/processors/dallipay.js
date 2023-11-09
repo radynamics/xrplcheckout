@@ -4,7 +4,7 @@ export class DalliPay {
     static id = "dallipay"
     id() { return DalliPay.id }
     name() { return "DalliPay" }
-    getPayAdviseText() { return 'Please open DalliPay on your computer first.' }
+    getPayAdviseText() { return i18next.t('dallipay_adviceText') }
 
     isReady() {
         return { ready: true }

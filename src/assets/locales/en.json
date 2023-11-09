@@ -34,5 +34,7 @@
     "amountMissing": "Amount missing",
     "ccyMissing": "Currency missing",
 
+    "dallipay_adviceText": "Please open DalliPay on your computer first.",
+
     "__dummy": ""
 }

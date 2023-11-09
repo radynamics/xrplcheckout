@@ -34,5 +34,7 @@
     "amountMissing": "Betrag fehlt",
     "ccyMissing": "Währung fehlt",
 
+    "dallipay_adviceText": "Bitte öffnen Sie zuerst DalliPay auf Ihrem Computer.",
+
     "__dummy": ""
 }

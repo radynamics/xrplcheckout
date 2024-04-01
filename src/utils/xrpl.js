@@ -170,8 +170,19 @@ export function hexToString(hex) {
 // The standard format for currency codes is a three-character string such as USD. (https://xrpl.org/currency-formats.html)
 const ccyCodeStandardFormatLength = 3;
 export function toCurrencyCode(currency) {
+    if (currency.length <= ccyCodeStandardFormatLength) {
+        return currency
+    }
+
+    // "LP Token Currency Codes" (https://xrpl.org/docs/concepts/tokens/decentralized-exchange/automated-market-makers/#lp-token-currency-codes)
+    if (currency.startsWith('03')) {
+        // Eg. "0348E1573E830D01581CD80DFE1E02A9FF55A34B" -> "LP 48E1573E830D01581CD80DFE1E02A9FF55A34B"
+        return `LP ${currency.substr(2)}`
+    }
+
     // replace() needed, due value is always 20 bytes, filled with 0.
-    return currency.length <= ccyCodeStandardFormatLength ? currency : hexToString(currency).replace(/\u0000/g,'');
+    // Eg. "7853504543544152000000000000000000000000" -> "xSPECTAR"
+    return hexToString(currency).replace(/\u0000/g,'')
 }
 export function fromCurrencyCode(code) {
     // value is always 20 bytes, filled with 0.

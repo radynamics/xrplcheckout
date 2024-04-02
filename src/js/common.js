@@ -50,10 +50,11 @@ async function getLocale(localesBasePath, locale, fallback) {
         return response.json()
     }).then (function (data) {
         return data
-    }).catch (function (error) {
+    }).catch (async function (error) {
         // Language not available
-        translation = getLocale(localesBasePath, fallback)
-        code = fallback
+        let loadedFallback = await getLocale(localesBasePath, fallback)
+        let trans = Object.values(loadedFallback)[1]
+        return trans.translation
     })
     return { code: code, [code]: { translation: translation } }
 }

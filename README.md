@@ -16,6 +16,8 @@ This simple WebApp allows you to create payment request URLs for your customers.
 ## Host on your own website (highly recommended!)
 Simply create a new subfolder on your website and upload all files by FTP. No further server configuration is needed. Rename settings.example.json to settings.json and edit its values for your own purposes.
 
+**WARNING**: All data in settings.json is publicly accessible and **not** securely protected. Use unique API keys for this app so that you can easily change them if they are misused.
+
 ### Configuring XUMM as payment method
 1. Create a new application in your [XUMM Developer Console](https://apps.xumm.dev/).
 2. In "Settings" make sure you define your XRPL Checkout path under "Origin/Redirect URIs". E.g. define https://www.google.com/xrplcheckout/?auth=true if your installation is accessible from https://www.google.com/xrplcheckout/.
